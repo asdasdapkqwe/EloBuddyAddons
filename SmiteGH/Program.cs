@@ -11,6 +11,7 @@ using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using SharpDX;
 using EloBuddy.SDK.Rendering;
+using Color1 = System.Drawing.Color;
 
 namespace SmiteGH
 {
@@ -36,6 +37,7 @@ namespace SmiteGH
             Bootstrap.Init(null);
             Drawing.OnDraw += Drawing_Settings;
             
+            
             if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name))
             {
                 Smite = new Spell.Targeted(SpellSlot.Summoner1, (uint)570f);
@@ -52,6 +54,7 @@ namespace SmiteGH
             SmiteGHMenu.AddGroupLabel("SmiteGH");
             SmiteGHMenu.AddSeparator();
             SmiteGHMenu.Add("active", new CheckBox("Enabled"));
+            SmiteGHMenu.Add("activekey", new KeyBind("Enabled (Toggle Key)", true, KeyBind.BindTypes.PressToggle));
             SmiteGHMenu.AddSeparator();
             SmiteGHMenu.AddLabel("Made By GameHackerPM");
 
@@ -74,6 +77,7 @@ namespace SmiteGH
             DrawingMenu.Add("draw", new CheckBox("Enabled"));
             DrawingMenu.AddSeparator(10);
             DrawingMenu.Add("smite", new CheckBox("Draw Smite"));
+            DrawingMenu.Add("drawTxt", new CheckBox("Draw Text"));
             DrawingMenu.Add("killable", new CheckBox("Draw Circle on Killable Monster"));
             Game.OnTick += Game_OnTick;
         }
@@ -82,11 +86,21 @@ namespace SmiteGH
         {
             if (DrawingMenu["draw"].Cast<CheckBox>().CurrentValue == false)
                 return;
+
+            if (DrawingMenu["drawTxt"].Cast<CheckBox>().CurrentValue)
+            {
+                if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue && SmiteGHMenu["activekey"].Cast<KeyBind>().CurrentValue)
+                    Drawing.DrawText(Drawing.WorldToScreen(Player.Instance.Position) - new Vector2(30, -30), Color1.White, "Smite : ON", 2);
+                else
+                    Drawing.DrawText(Drawing.WorldToScreen(Player.Instance.Position) - new Vector2(30, -30), Color1.DarkRed, "Smite : OFF", 2);
+            }
+
             if (DrawingMenu["smite"].Cast<CheckBox>().CurrentValue)
                 if (Smite.IsReady())
                     Circle.Draw(Color.CadetBlue, 500f, ObjectManager.Player.ServerPosition);
                 else
                     Circle.Draw(Color.Red, 500f, ObjectManager.Player.ServerPosition);
+
             if (DrawingMenu["killable"].Cast<CheckBox>().CurrentValue)
             {
                 Monster = GetNearest(ObjectManager.Player.ServerPosition);
@@ -112,7 +126,7 @@ namespace SmiteGH
 
         private static void Game_OnTick(EventArgs args)
         {
-            if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue)
+            if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue && SmiteGHMenu["activekey"].Cast<KeyBind>().CurrentValue)
             {
                 Monster = GetNearest(ObjectManager.Player.ServerPosition);
                 if (Monster != null && MobsToSmite[Monster.BaseSkinName].Cast<CheckBox>().CurrentValue)
