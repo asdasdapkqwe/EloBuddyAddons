@@ -10,6 +10,7 @@ using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using SharpDX;
+using EloBuddy.SDK.Rendering;
 
 namespace SmiteGH
 {
@@ -28,11 +29,12 @@ namespace SmiteGH
             "SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", 
             "SRU_Red", "SRU_Krug", "SRU_Dragon", "Sru_Crab", "SRU_Baron"
         };
-        public static Menu SmiteGHMenu, MobsToSmite;
+        public static Menu SmiteGHMenu, MobsToSmite, DrawingMenu;
         private static string[] SmiteNames = new[] { "s5_summonersmiteplayerganker", "itemsmiteaoe", "s5_summonersmitequick", "s5_summonersmiteduel", "summonersmite" };
         private static void Loading_OnLoadingComplete(EventArgs args)
         {
             Bootstrap.Init(null);
+            Drawing.OnDraw += Drawing_Settings;
             
             if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name))
             {
@@ -66,7 +68,34 @@ namespace SmiteGH
             MobsToSmite.Add("SRU_Razorbeak", new CheckBox("Razorbeak Enabled"));
             MobsToSmite.Add("Sru_Crab", new CheckBox("Crab Enabled"));
 
+            DrawingMenu = SmiteGHMenu.AddSubMenu("Drawing", "drawing");
+            DrawingMenu.AddGroupLabel("Drawing Settings");
+            DrawingMenu.AddSeparator();
+            DrawingMenu.Add("draw", new CheckBox("Enabled"));
+            DrawingMenu.AddSeparator(10);
+            DrawingMenu.Add("smite", new CheckBox("Draw Smite"));
+            DrawingMenu.Add("killable", new CheckBox("Draw Circle on Killable Monster"));
             Game.OnTick += Game_OnTick;
+        }
+
+        public static void Drawing_Settings(EventArgs args)
+        {
+            if (DrawingMenu["draw"].Cast<CheckBox>().CurrentValue == false)
+                return;
+            if (DrawingMenu["smite"].Cast<CheckBox>().CurrentValue)
+                if (Smite.IsReady())
+                    Circle.Draw(Color.CadetBlue, 500f, ObjectManager.Player.ServerPosition);
+                else
+                    Circle.Draw(Color.Red, 500f, ObjectManager.Player.ServerPosition);
+            if (DrawingMenu["killable"].Cast<CheckBox>().CurrentValue)
+            {
+                Monster = GetNearest(ObjectManager.Player.ServerPosition);
+                if (Monster != null)
+                {
+                    if (Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < 900f)
+                        Circle.Draw(Color.Purple, 100f, Monster.ServerPosition);
+                }
+            }
         }
 
         public static int GetSmiteDamage()
