@@ -78,6 +78,9 @@ namespace SharedExp
 
         public static void Drawing_Settings(EventArgs args)
         {
+            if (!SharedExpMenu["active"].Cast<CheckBox>().CurrentValue)
+                return;
+                
             int i = -1;
             int c = -1;
 
@@ -169,6 +172,9 @@ namespace SharedExp
 
         private static void Game_OnTick(EventArgs args)
         {
+            if (!SharedExpMenu["active"].Cast<CheckBox>().CurrentValue)
+                return;
+                
             int i = -1;
             float expReceived = 0;
 
