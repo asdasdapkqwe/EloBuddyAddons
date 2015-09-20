@@ -24,6 +24,10 @@ namespace SmiteGH
 
         public static Spell.Targeted Smite;
         public static Obj_AI_Base Monster;
+        public static string[] SupportedChampions =
+        {
+            "Nunu" , ""
+        };
         public static string[] MonstersNames =
         {
             "TT_Spiderboss", "TTNGolem", "TTNWolf", "TTNWraith",
@@ -36,8 +40,7 @@ namespace SmiteGH
         {
             Bootstrap.Init(null);
             Drawing.OnDraw += Drawing_Settings;
-            
-            
+           
             if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name))
             {
                 Smite = new Spell.Targeted(SpellSlot.Summoner1, (uint)570f);
@@ -50,6 +53,11 @@ namespace SmiteGH
             if (Smite == null) //if you don't have smite, so ? ^_^ Why we load?
                 return;
 
+            if (SupportedChampions.Contains(ObjectManager.Player.ChampionName))
+                Chat.Print("[SmiteGH Loaded] " + ObjectManager.Player.ChampionName + " Has Loaded!", Color1.Violet);
+            else
+                Chat.Print("[SmiteGH Loaded] " + ObjectManager.Player.ChampionName + " is not supported, but Smite still working!", Color1.Violet);
+
             SmiteGHMenu = MainMenu.AddMenu("SmiteGH", "smitegh");
             SmiteGHMenu.AddGroupLabel("SmiteGH");
             SmiteGHMenu.AddSeparator();
@@ -60,6 +68,8 @@ namespace SmiteGH
 
             MobsToSmite = SmiteGHMenu.AddSubMenu("Monsters", "Monsters");
             MobsToSmite.AddGroupLabel("Monsters Settings");
+            MobsToSmite.AddSeparator();
+            MobsToSmite.Add("killsmite", new CheckBox("KS Enemy with Smite"));
             MobsToSmite.AddSeparator();
             MobsToSmite.Add("SRU_Baron", new CheckBox("Baron Enabled"));
             MobsToSmite.Add("SRU_Dragon", new CheckBox("Dragon Enabled"));
@@ -79,7 +89,7 @@ namespace SmiteGH
             DrawingMenu.Add("smite", new CheckBox("Draw Smite"));
             DrawingMenu.Add("drawTxt", new CheckBox("Draw Text"));
             DrawingMenu.Add("killable", new CheckBox("Draw Circle on Killable Monster"));
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
         }
 
         public static void Drawing_Settings(EventArgs args)
@@ -124,17 +134,97 @@ namespace SmiteGH
             return CalcSmiteDamage.Max();
         }
 
-        private static void Game_OnTick(EventArgs args)
+        private static void smiteKill()
         {
-            if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue && SmiteGHMenu["activekey"].Cast<KeyBind>().CurrentValue)
+            if (!SmiteGHMenu["killsmite"].Cast<CheckBox>().CurrentValue)
+                return;
+
+            var KillEnemy =
+                HeroManager.Enemies.FirstOrDefault(hero => hero.IsValidTarget(500f)
+                    && SmiteChampDamage() >= hero.Health);
+
+            if (KillEnemy != null)
+                Player.CastSpell(Smite.Slot, KillEnemy);
+        }
+
+        static double SmiteChampDamage()
+        {
+            if (Smite.Slot == EloBuddy.SDK.Extensions.GetSpellSlotFromName(ObjectManager.Player, "s5_summonersmiteduel"))
             {
-                Monster = GetNearest(ObjectManager.Player.ServerPosition);
-                if (Monster != null && MobsToSmite[Monster.BaseSkinName].Cast<CheckBox>().CurrentValue)
-                {
-                    if (Smite.IsReady() && Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
-                        Player.CastSpell(Smite.Slot, Monster);
-                }
+                var damage = new int[] { 54 + 6 * ObjectManager.Player.Level };
+                return Player.CanUseSpell(Smite.Slot) == SpellState.Ready ? damage.Max() : 0;
             }
+
+            if (Smite.Slot == EloBuddy.SDK.Extensions.GetSpellSlotFromName(ObjectManager.Player, "s5_summonersmiteplayerganker"))
+            {
+                var damage = new int[] { 20 + 8 * ObjectManager.Player.Level };
+                return Player.CanUseSpell(Smite.Slot) == SpellState.Ready ? damage.Max() : 0;
+            }
+            return 0;
+        }
+        private static double getNunuQDamage(int SpellLevel)
+        {
+            double[] damage = {400, 550, 700, 850, 1000};
+            return damage[SpellLevel];
+        }
+        private static void Game_OnUpdate(EventArgs args)
+        {
+            smiteKill();
+
+            if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue || SmiteGHMenu["activekey"].Cast<KeyBind>().CurrentValue)
+            {
+                double SpellDamage = 0;
+                double TotalDamage = 0;
+                Monster = GetNearest(ObjectManager.Player.ServerPosition);
+                switch (ObjectManager.Player.ChampionName)
+                {
+                    case "Nunu":
+                        {
+                            Spell.Targeted Q = new Spell.Targeted(SpellSlot.Q, (uint)200f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = getNunuQDamage(Q.Level - 1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(Q.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    default:
+                        {
+
+                            //Monster = GetNearest(ObjectManager.Player.ServerPosition);
+                            if (Monster != null && MobsToSmite[Monster.BaseSkinName].Cast<CheckBox>().CurrentValue)
+                            {
+                                if (Smite.IsReady() && Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                                    Player.CastSpell(Smite.Slot, Monster);
+                            }
+                        }
+                        break;
+                }
+
+
+            }
+        }
+
+        private static void SmiteOP()
+        {
+            
+                
+            
         }
 
         public static Obj_AI_Minion GetNearest(Vector3 pos)
