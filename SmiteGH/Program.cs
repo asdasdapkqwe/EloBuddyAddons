@@ -22,11 +22,14 @@ namespace SmiteGH
             Loading.OnLoadingComplete += Loading_OnLoadingComplete;
         }
 
+        public static double TotalDamage = 0;
+
         public static Spell.Targeted Smite;
         public static Obj_AI_Base Monster;
         public static string[] SupportedChampions =
         {
-            "Nunu" , ""
+            "Nunu" , "Chogath", "Shaco", "Vi", "MasterYi", "Rengar",
+            "Nasus" , "Khazix", "Fizz", "Elise"
         };
         public static string[] MonstersNames =
         {
@@ -39,8 +42,7 @@ namespace SmiteGH
         private static void Loading_OnLoadingComplete(EventArgs args)
         {
             Bootstrap.Init(null);
-            Drawing.OnDraw += Drawing_Settings;
-           
+
             if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name))
             {
                 Smite = new Spell.Targeted(SpellSlot.Summoner1, (uint)570f);
@@ -89,7 +91,10 @@ namespace SmiteGH
             DrawingMenu.Add("smite", new CheckBox("Draw Smite"));
             DrawingMenu.Add("drawTxt", new CheckBox("Draw Text"));
             DrawingMenu.Add("killable", new CheckBox("Draw Circle on Killable Monster"));
+
+
             Game.OnUpdate += Game_OnUpdate;
+            Drawing.OnDraw += Drawing_Settings;
         }
 
         public static void Drawing_Settings(EventArgs args)
@@ -116,7 +121,7 @@ namespace SmiteGH
                 Monster = GetNearest(ObjectManager.Player.ServerPosition);
                 if (Monster != null)
                 {
-                    if (Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < 900f)
+                    if (Monster.Health <= (TotalDamage == 0 ? GetSmiteDamage() : TotalDamage) && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < 900f)
                         Circle.Draw(Color.Purple, 100f, Monster.ServerPosition);
                 }
             }
@@ -134,19 +139,6 @@ namespace SmiteGH
             return CalcSmiteDamage.Max();
         }
 
-        private static void smiteKill()
-        {
-            if (!SmiteGHMenu["killsmite"].Cast<CheckBox>().CurrentValue)
-                return;
-
-            var KillEnemy =
-                HeroManager.Enemies.FirstOrDefault(hero => hero.IsValidTarget(500f)
-                    && SmiteChampDamage() >= hero.Health);
-
-            if (KillEnemy != null)
-                Player.CastSpell(Smite.Slot, KillEnemy);
-        }
-
         static double SmiteChampDamage()
         {
             if (Smite.Slot == EloBuddy.SDK.Extensions.GetSpellSlotFromName(ObjectManager.Player, "s5_summonersmiteduel"))
@@ -162,22 +154,28 @@ namespace SmiteGH
             }
             return 0;
         }
-        private static double getNunuQDamage(int SpellLevel)
-        {
-            double[] damage = {400, 550, 700, 850, 1000};
-            return damage[SpellLevel];
-        }
         private static void Game_OnUpdate(EventArgs args)
         {
-            smiteKill();
+            if (SmiteGHMenu["killsmite"].Cast<CheckBox>().CurrentValue)
+            {
+                try
+                {
+                    var KillEnemy =
+                        HeroManager.Enemies.FirstOrDefault(hero => hero.IsValidTarget(500f)
+                            && SmiteChampDamage() >= hero.Health);
+                    if (KillEnemy != null)
+                        Player.CastSpell(Smite.Slot, KillEnemy);
+                }
+                catch { }
+            }
 
             if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue || SmiteGHMenu["activekey"].Cast<KeyBind>().CurrentValue)
             {
                 double SpellDamage = 0;
-                double TotalDamage = 0;
                 Monster = GetNearest(ObjectManager.Player.ServerPosition);
                 switch (ObjectManager.Player.ChampionName)
                 {
+                    #region Nunu
                     case "Nunu":
                         {
                             Spell.Targeted Q = new Spell.Targeted(SpellSlot.Q, (uint)200f);
@@ -185,7 +183,7 @@ namespace SmiteGH
                             if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                 && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                             {
-                                SpellDamage = getNunuQDamage(Q.Level - 1);
+                                SpellDamage = GetDamages.Nunu(Q.Level - 1);
                                 TotalDamage = SpellDamage + GetSmiteDamage();
                                 if (Monster.Health <= TotalDamage)
                                 {
@@ -203,10 +201,252 @@ namespace SmiteGH
                             }
                             break;
                         }
+                    #endregion
+                    #region ChoGath
+                    case "Chogath":
+                        {
+                            Spell.Targeted R = new Spell.Targeted(SpellSlot.R, (uint)175f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && R.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < R.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.ChoGath();
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(R.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region Shaco
+                    case "Shaco":
+                        {
+                            Spell.Targeted E = new Spell.Targeted(SpellSlot.E, (uint)625f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && E.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < E.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Shaco(E.Level -1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(E.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region Vi
+                    case "Vi":
+                        {
+                            Spell.Active E = new Spell.Active(SpellSlot.E, (uint)600f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && E.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < E.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Vi(E.Level - 1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(E.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region MasterYi
+                    case "MasterYi":
+                        {
+                            Spell.Targeted Q = new Spell.Targeted(SpellSlot.Q, (uint)600f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Master(Q.Level - 1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(Q.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region Rengar
+                    case "Rengar":
+                        {
+                            Spell.Active Q = new Spell.Active(SpellSlot.Q, (uint)ObjectManager.Player.AttackRange);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Rengar(Q.Level - 1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(Q.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region Nasus
+                    case "Nasus":
+                        {
+                            Spell.Active Q = new Spell.Active(SpellSlot.Q, (uint)ObjectManager.Player.AttackRange);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Nasus(Q.Level - 1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(Q.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region KhaZix
+                    case "Khazix":
+                        {
+                            Spell.Targeted Q = new Spell.Targeted(SpellSlot.Q, (uint)325f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Khazix(Q.Level - 1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(Q.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region Fizz
+                    case "Fizz":
+                        {
+                            Spell.Targeted Q = new Spell.Targeted(SpellSlot.Q, (uint)550f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Fizz(Q.Level - 1);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(Q.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
+                    #region Elise
+                    case "Elise":
+                        {
+                            Spell.Targeted Q = new Spell.Targeted(SpellSlot.Q, (uint)475f);
+                            //Smite and Spell  ==> OKAY
+                            if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                SpellDamage = GetDamages.Elise(Q.Level - 1, Monster);
+                                TotalDamage = SpellDamage + GetSmiteDamage();
+                                if (Monster.Health <= TotalDamage)
+                                {
+                                    Player.CastSpell(Q.Slot, Monster);
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            //If Spell is busy, Go Smite only! ^_^
+                            else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            {
+                                if (Monster.Health <= GetSmiteDamage())
+                                {
+                                    Player.CastSpell(Smite.Slot, Monster);
+                                }
+                            }
+                            break;
+                        }
+                    #endregion
                     default:
                         {
-
-                            //Monster = GetNearest(ObjectManager.Player.ServerPosition);
                             if (Monster != null && MobsToSmite[Monster.BaseSkinName].Cast<CheckBox>().CurrentValue)
                             {
                                 if (Smite.IsReady() && Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
@@ -215,16 +455,7 @@ namespace SmiteGH
                         }
                         break;
                 }
-
-
             }
-        }
-
-        private static void SmiteOP()
-        {
-            
-                
-            
         }
 
         public static Obj_AI_Minion GetNearest(Vector3 pos)
