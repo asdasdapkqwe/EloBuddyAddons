@@ -198,6 +198,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -225,6 +226,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -252,6 +254,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -279,6 +282,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -306,6 +310,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -333,6 +338,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -360,6 +366,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -387,6 +394,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -414,6 +422,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -441,6 +450,7 @@ namespace SmiteGH
                                 {
                                     Player.CastSpell(Smite.Slot, Monster);
                                 }
+                                TotalDamage = 0;
                             }
                             break;
                         }
@@ -452,6 +462,7 @@ namespace SmiteGH
                                 if (Smite.IsReady() && Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                     Player.CastSpell(Smite.Slot, Monster);
                             }
+                            TotalDamage = 0;
                         }
                         break;
                 }
