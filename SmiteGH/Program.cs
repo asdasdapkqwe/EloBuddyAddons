@@ -105,28 +105,17 @@ namespace SmiteGH
                 return;
 
             if (DrawingMenu["drawTxt"].Cast<CheckBox>().CurrentValue)
-            {
-                SmiteStatus.Color = Color1.White;
-                SmiteStatus.Position = Player.Instance.Position.WorldToScreen() - new Vector2(30, -30);
-
-                if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue && SmiteGHMenu["activekey"].Cast<KeyBind>().CurrentValue)
-                {
-                    SmiteStatus = new Text("Smite : ON", new System.Drawing.Font("Lucida Sans Unicode", 7.0F, System.Drawing.FontStyle.Regular));
-                    SmiteStatus.Color = Color1.White;
-                }
-                else
-                {
-                    SmiteStatus = new Text("Smite : OFF", new System.Drawing.Font("Lucida Sans Unicode", 7.0F, System.Drawing.FontStyle.Bold));
-                    SmiteStatus.Color = Color1.Red;
-                }
-                SmiteStatus.Draw();
-            }
+                Drawing.DrawText(Drawing.WorldToScreen(Player.Instance.Position) - new Vector2(30, -30), Color1.White, "Smite : ON", 2);
+            else
+                Drawing.DrawText(Drawing.WorldToScreen(Player.Instance.Position) - new Vector2(30, -30), Color1.DarkRed, "Smite : OFF", 2);
 
             if (DrawingMenu["smite"].Cast<CheckBox>().CurrentValue)
+            {
                 if (Smite.IsReady())
                     Circle.Draw(Color.CadetBlue, 500f + 20, ObjectManager.Player.ServerPosition);
                 else
                     Circle.Draw(Color.Red, 500f + 20, ObjectManager.Player.ServerPosition);
+            }
 
             if (DrawingMenu["killable"].Cast<CheckBox>().CurrentValue)
             {
