@@ -12,6 +12,7 @@ using EloBuddy.SDK.Menu.Values;
 using SharpDX;
 using EloBuddy.SDK.Rendering;
 using Color1 = System.Drawing.Color;
+using SharpDX.Direct3D9;
 
 namespace SmiteGH
 {
@@ -26,6 +27,7 @@ namespace SmiteGH
 
         public static Spell.Targeted Smite;
         public static Obj_AI_Base Monster;
+        public static Text SmiteStatus;
         public static string[] SupportedChampions =
         {
             "Nunu" , "Chogath", "Shaco", "Vi", "MasterYi", "Rengar",
@@ -104,17 +106,27 @@ namespace SmiteGH
 
             if (DrawingMenu["drawTxt"].Cast<CheckBox>().CurrentValue)
             {
+                SmiteStatus.Color = Color1.White;
+                SmiteStatus.Position = Player.Instance.Position.WorldToScreen() - new Vector2(30, -30);
+
                 if (SmiteGHMenu["active"].Cast<CheckBox>().CurrentValue && SmiteGHMenu["activekey"].Cast<KeyBind>().CurrentValue)
-                    Drawing.DrawText(Drawing.WorldToScreen(Player.Instance.Position) - new Vector2(30, -30), Color1.White, "Smite : ON", 2);
+                {
+                    SmiteStatus = new Text("Smite : ON", new System.Drawing.Font("Lucida Sans Unicode", 7.0F, System.Drawing.FontStyle.Regular));
+                    SmiteStatus.Color = Color1.White;
+                }
                 else
-                    Drawing.DrawText(Drawing.WorldToScreen(Player.Instance.Position) - new Vector2(30, -30), Color1.DarkRed, "Smite : OFF", 2);
+                {
+                    SmiteStatus = new Text("Smite : OFF", new System.Drawing.Font("Lucida Sans Unicode", 7.0F, System.Drawing.FontStyle.Bold));
+                    SmiteStatus.Color = Color1.Red;
+                }
+                SmiteStatus.Draw();
             }
 
             if (DrawingMenu["smite"].Cast<CheckBox>().CurrentValue)
                 if (Smite.IsReady())
-                    Circle.Draw(Color.CadetBlue, 500f, ObjectManager.Player.ServerPosition);
+                    Circle.Draw(Color.CadetBlue, 500f + 20, ObjectManager.Player.ServerPosition);
                 else
-                    Circle.Draw(Color.Red, 500f, ObjectManager.Player.ServerPosition);
+                    Circle.Draw(Color.Red, 500f + 20, ObjectManager.Player.ServerPosition);
 
             if (DrawingMenu["killable"].Cast<CheckBox>().CurrentValue)
             {
@@ -463,6 +475,12 @@ namespace SmiteGH
                                 }
                                 break;
                         }
+                    }
+                    Monster = GetNearest(ObjectManager.Player.ServerPosition);
+                    if (Monster != null && MobsToSmite[Monster.BaseSkinName].Cast<CheckBox>().CurrentValue)
+                    {
+                        if (Smite.IsReady() && Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                            Player.CastSpell(Smite.Slot, Monster);
                     }
                 }
             }
