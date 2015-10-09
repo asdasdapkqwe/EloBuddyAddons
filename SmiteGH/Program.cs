@@ -30,7 +30,9 @@ namespace SmiteGH
         public static string[] SupportedChampions =
         {
             "Nunu" , "Chogath", "Shaco", "Vi", "MasterYi", "Rengar",
-            "Nasus" , "Khazix", "Fizz", "Elise"
+            "Nasus" , "Khazix", "Fizz", "Elise", "Volibear",
+            "Warwick", "Irelia", "Amumu", "Hecarim", "Pantheon",
+            "Olaf", "LeeSin", "MonkeyKing"
         };
         public static string[] MonstersNames =
         {
