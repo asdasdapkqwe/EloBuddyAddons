@@ -20,7 +20,7 @@ namespace SmiteGH
         // Nunu'S Q Spell damage.
         public static double Nunu(int SpellLevel)
         {
-            return new double[] { 400, 550, 700, 850, 1000 }[SpellLevel];
+            return new double[] { 400, 550, 700, 850, 1000 }[SpellLevel - 1];
         }
 
         // Cho'Goth's R Spell damage.
@@ -32,14 +32,14 @@ namespace SmiteGH
         // Shaco's E Spell damage.
         public static double Shaco(int SpellLevel)
         {
-            return new double[] { 50, 90, 130, 170, 210 }[SpellLevel]
+            return new double[] { 50, 90, 130, 170, 210 }[SpellLevel - 1]
                 + 1 * ObjectManager.Player.FlatPhysicalDamageMod + 1 * ObjectManager.Player.FlatMagicDamageMod;
         }
 
         // Vi's E Spell damage.
         public static double Vi(int SpellLevel)
         {
-            return new double[] { 5, 20, 35, 50, 65 }[SpellLevel]
+            return new double[] { 5, 20, 35, 50, 65 }[SpellLevel - 1]
                 + 1.15 * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod)
                 + 0.7 * ObjectManager.Player.FlatMagicDamageMod;
         }
@@ -47,7 +47,7 @@ namespace SmiteGH
         //Master's Q Spell damage.
         public static double Master(int SpellLevel)
         {
-            return new double[] { 25, 60, 95, 130, 165 }[SpellLevel]
+            return new double[] { 25, 60, 95, 130, 165 }[SpellLevel - 1]
                  + 1 * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod)
                  + 0.6 * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod);
         }
@@ -55,7 +55,7 @@ namespace SmiteGH
         //Rengar's Q Spell damage.
         public static double Rengar(int SpellLevel)
         {
-            return new double[] { 30, 60, 90, 120, 150 }[SpellLevel]
+            return new double[] { 30, 60, 90, 120, 150 }[SpellLevel - 1]
                  + new double[] { 0, 5, 10, 15, 20 }[SpellLevel] / 100
                  * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod);
         }
@@ -66,27 +66,27 @@ namespace SmiteGH
             return (from buff in ObjectManager.Player.Buffs
                     where buff.Name == "nasusqstacks"
                     select buff.Count).FirstOrDefault()
-                 + new double[] { 30, 50, 70, 90, 110 }[SpellLevel];
+                 + new double[] { 30, 50, 70, 90, 110 }[SpellLevel - 1];
         }
 
         //Khazix's Q Spell damage.
         public static double Khazix(int SpellLevel)
         {
-            return new double[] { 70, 95, 120, 145, 170 }[SpellLevel]
+            return new double[] { 70, 95, 120, 145, 170 }[SpellLevel - 1]
                  + 1.2 * ObjectManager.Player.FlatPhysicalDamageMod;
         }
 
         //Fizz's Q Spell damage.
         public static double Fizz(int SpellLevel)
         {
-            return new double[] { 10, 25, 40, 55, 70 }[SpellLevel]
+            return new double[] { 10, 25, 40, 55, 70 }[SpellLevel - 1]
                  + 0.35 * ObjectManager.Player.FlatMagicDamageMod;
         }
 
         //Elise's Q Spell damage.
         public static double Elise(int SpellLevel, Obj_AI_Base Monster)
         {
-            return new double[] { 40, 75, 110, 145, 180 }[SpellLevel]
+            return new double[] { 40, 75, 110, 145, 180 }[SpellLevel - 1]
                  + (0.08 + 0.03 / 100 * ObjectManager.Player.FlatMagicDamageMod) * Monster.Health;
         }
 
@@ -181,8 +181,15 @@ namespace SmiteGH
         //Irelia's Q Spell damage.
         public static double Irelia(int SpellLevel)
         {
-            return new double[] { 20, 50, 80, 110, 140 }[SpellLevel]
+            return new double[] { 20, 50, 80, 110, 140 }[SpellLevel - 1]
                              + 1 * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod);
+        }
+
+        //Evelynn's E Spell damage.
+        public static double Evelynn(int SpellLevel)
+        {
+            return new double[] { 70, 110, 150, 190, 230 }[SpellLevel - 1]
+                                    + 1 * ObjectManager.Player.FlatMagicDamageMod + 1 * ObjectManager.Player.FlatPhysicalDamageMod;
         }
     }
 }

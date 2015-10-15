@@ -32,7 +32,7 @@ namespace SmiteGH
             "Nunu" , "Chogath", "Shaco", "Vi", "MasterYi", "Rengar",
             "Nasus" , "Khazix", "Fizz", "Elise", "Volibear",
             "Warwick", "Irelia", "Amumu", "Hecarim", "Pantheon",
-            "Olaf", "LeeSin", "MonkeyKing"
+            "Olaf", "LeeSin", "MonkeyKing", "Evelynn"
         };
         public static string[] MonstersNames =
         {
@@ -187,6 +187,34 @@ namespace SmiteGH
                         {
                             switch (ObjectManager.Player.ChampionName)
                             {
+                                #region Evelynn
+                                case "Evelynn":
+                                    {
+                                        Spell.Targeted E = new Spell.Targeted(SpellSlot.E, (uint)(225f + 2 * 65f));
+                                        //Smite and Spell  ==> OKAY
+                                        if (Smite.IsReady() && E.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < E.Range
+                                            && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                                        {
+                                            SpellDamage = GetDamages.Evelynn(E.Level);
+                                            TotalDamage = SpellDamage + GetSmiteDamage();
+                                            if (Monster.Health <= TotalDamage)
+                                            {
+                                                E.Cast(Monster);
+                                                //Smite.Cast(Monster);
+                                            }
+                                        }
+                                        //If Spell is busy, Go Smite only! ^_^
+                                        else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                                        {
+                                            if (Monster.Health <= GetSmiteDamage())
+                                            {
+                                                Smite.Cast(Monster);
+                                            }
+                                            TotalDamage = 0;
+                                        }
+                                        break;
+                                    }
+                                #endregion
                                 #region Irelia
                                 case "Irelia":
                                     {
@@ -422,7 +450,7 @@ namespace SmiteGH
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
                                             if (GetDamages.BuffedEnemy != null)
-                                                SpellDamage = GetDamages.Q2Damage(Monster, Q2.Level - 1);
+                                                SpellDamage = GetDamages.Q2Damage(Monster, Q2.Level);
                                             else
                                                 SpellDamage = GetDamages.QDamage(Monster, Q.Level - 1) + GetDamages.Q2Damage(Monster, Q2.Level - 1);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
@@ -455,7 +483,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Nunu(Q.Level - 1);
+                                            SpellDamage = GetDamages.Nunu(Q.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -511,7 +539,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && E.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < E.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Shaco(E.Level - 1);
+                                            SpellDamage = GetDamages.Shaco(E.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -539,7 +567,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && E.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < E.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Vi(E.Level - 1);
+                                            SpellDamage = GetDamages.Vi(E.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -567,7 +595,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Master(Q.Level - 1);
+                                            SpellDamage = GetDamages.Master(Q.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -595,7 +623,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Rengar(Q.Level - 1);
+                                            SpellDamage = GetDamages.Rengar(Q.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -623,7 +651,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Nasus(Q.Level - 1);
+                                            SpellDamage = GetDamages.Nasus(Q.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -651,7 +679,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Khazix(Q.Level - 1);
+                                            SpellDamage = GetDamages.Khazix(Q.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -679,7 +707,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Fizz(Q.Level - 1);
+                                            SpellDamage = GetDamages.Fizz(Q.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -707,7 +735,7 @@ namespace SmiteGH
                                         if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
                                             && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
                                         {
-                                            SpellDamage = GetDamages.Elise(Q.Level - 1, Monster);
+                                            SpellDamage = GetDamages.Elise(Q.Level, Monster);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
@@ -727,6 +755,7 @@ namespace SmiteGH
                                         break;
                                     }
                                 #endregion
+
                                 default:
                                     {
                                         if (Smite.IsReady() && Monster.Health <= GetSmiteDamage() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
