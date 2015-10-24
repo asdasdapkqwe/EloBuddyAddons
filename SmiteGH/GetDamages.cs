@@ -189,7 +189,20 @@ namespace SmiteGH
         public static double Evelynn(int SpellLevel)
         {
             return new double[] { 70, 110, 150, 190, 230 }[SpellLevel - 1]
-                                    + 1 * ObjectManager.Player.FlatMagicDamageMod + 1 * ObjectManager.Player.FlatPhysicalDamageMod;
+                              + 1 * ObjectManager.Player.FlatMagicDamageMod + 1 * ObjectManager.Player.FlatPhysicalDamageMod;
+        }
+
+        //Diana's Q Spell damage.
+        public static double DianaQ(int SpellLevel)
+        {
+            return new double[] { 60, 95, 130, 165, 200 }[SpellLevel - 1]
+                             + 0.7 * ObjectManager.Player.FlatMagicDamageMod;
+        }
+
+        public static double DianaR(int SpellLevel)
+        {
+            return new double[] { 100, 160, 220 }[SpellLevel]
+                             + 0.6 * ObjectManager.Player.FlatMagicDamageMod;
         }
     }
 }

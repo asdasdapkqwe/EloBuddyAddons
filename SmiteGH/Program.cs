@@ -32,7 +32,7 @@ namespace SmiteGH
             "Nunu" , "Chogath", "Shaco", "Vi", "MasterYi", "Rengar",
             "Nasus" , "Khazix", "Fizz", "Elise", "Volibear",
             "Warwick", "Irelia", "Amumu", "Hecarim", "Pantheon",
-            "Olaf", "LeeSin", "MonkeyKing", "Evelynn"
+            "Olaf", "LeeSin", "MonkeyKing", "Evelynn" , "Diana"
         };
         public static string[] MonstersNames =
         {
@@ -187,6 +187,47 @@ namespace SmiteGH
                         {
                             switch (ObjectManager.Player.ChampionName)
                             {
+                                #region Diana
+                                case "Diana":
+                                    {
+                                        Spell.Skillshot Q = new Spell.Skillshot(SpellSlot.Q, (uint)895, SkillShotType.Circular);
+                                        Spell.Targeted R = new Spell.Targeted(SpellSlot.R, (uint)825);
+
+                                        //Smite and Spell  ==> OKAY
+                                        if (Smite.IsReady() && Q.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Q.Range
+                                            && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                                        {
+                                            SpellDamage = GetDamages.DianaQ(Q.Level) + GetDamages.DianaR(Q.Level);
+                                            TotalDamage = SpellDamage + GetSmiteDamage();
+                                            if (Monster.Health <= TotalDamage)
+                                            {
+                                                Q.Cast(Monster.ServerPosition);
+                                                //Smite.Cast(Monster);
+                                            }
+                                        }
+                                        else if (Smite.IsReady() && R.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < R.Range
+                                        && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range && GetDamages.HasBuffs(Monster, "dianamoonlight"))
+                                        {
+                                            SpellDamage = GetDamages.DianaR(Q.Level);
+                                            TotalDamage = SpellDamage + GetSmiteDamage();
+                                            if (Monster.Health <= TotalDamage)
+                                            {
+                                                R.Cast(Monster);
+                                                //Smite.Cast(Monster);
+                                            }
+                                        }
+                                        //If Spell is busy, Go Smite only! ^_^
+                                        else if (Smite.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range)
+                                        {
+                                            if (Monster.Health <= GetSmiteDamage())
+                                            {
+                                                Smite.Cast(Monster);
+                                            }
+                                            TotalDamage = 0;
+                                        }
+                                        break;
+                                    }
+                                #endregion
                                 #region Evelynn
                                 case "Evelynn":
                                     {
