@@ -17,6 +17,10 @@ namespace SharedExp
 {
     class Program
     {
+        public static Text ChampionName = new EloBuddy.SDK.Rendering.Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 9, System.Drawing.FontStyle.Bold));
+
+        public static Text InvCount = new EloBuddy.SDK.Rendering.Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 9, System.Drawing.FontStyle.Bold));
+        
         static void Main(string[] args)
         {
             Loading.OnLoadingComplete += Loading_OnLoadingComplete;
@@ -49,7 +53,7 @@ namespace SharedExp
         {
             Bootstrap.Init(null);
             Drawing.OnDraw += Drawing_Settings;
-            Game.OnTick += Game_OnTick;
+            Game.OnUpdate += Game_OnUpdate;
 
             SharedExpMenu = MainMenu.AddMenu("SharedExp", "sharedexp");
             SharedExpMenu.AddGroupLabel("SharedExperience");
@@ -78,9 +82,6 @@ namespace SharedExp
 
         public static void Drawing_Settings(EventArgs args)
         {
-            if (!SharedExpMenu["active"].Cast<CheckBox>().CurrentValue)
-                return;
-                
             int i = -1;
             int c = -1;
 
@@ -137,15 +138,23 @@ namespace SharedExp
                             new Vector2(x - 5, y + 21),
                             new Vector2(x - 5, y - 4.5f), 3, VisibleColor[i]);
 
-
-                        Drawing.DrawText(x + 5, y, MissingColor[i], hero.ChampionName);
+                        
+                        //Drawing.DrawText(x + 5, y, MissingColor[i], hero.ChampionName);
+                        ChampionName.Position = new Vector2(x + 5, y);
+                        ChampionName.TextValue = hero.ChampionName;
+                        ChampionName.Color = MissingColor[i];
+                        ChampionName.Draw();
                     }
                 }
                 else
                 {
                     if (ChampionListMenu["drawchampionlist"].Cast<CheckBox>().CurrentValue)
                     {
-                        Drawing.DrawText(x + 5, y, MissingColor[i], hero.ChampionName);
+                        //Drawing.DrawText(x + 5, y, MissingColor[i], hero.ChampionName);
+                        ChampionName.Position = new Vector2(x + 5, y);
+                        ChampionName.TextValue = hero.ChampionName;
+                        ChampionName.Color = MissingColor[i];
+                        ChampionName.Draw();
                     }
                 }
 
@@ -161,20 +170,25 @@ namespace SharedExp
                     if (InvisibleCount[i] > 0)
                     {
                         Drawing.DrawText(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset, Cor[i], "+" + (SharingCount[i] - 1) + " (" + InvisibleCount[i] + " Inv)");
+                        InvCount.Position = new Vector2(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset);
+                        InvCount.TextValue = "+" + (SharingCount[i] - 1) + " (" + InvisibleCount[i] + " Inv)";
+                        InvCount.Color = Cor[i];
+                        InvCount.Draw();
                     }
                     if (!DrawMenu["onlyShowInv"].Cast<CheckBox>().CurrentValue && InvisibleCount[i] == 0)
                     {
                         Drawing.DrawText(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset, Cor[i], "+" + (SharingCount[i] - 1));
+                        InvCount.Position = new Vector2(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset);
+                        InvCount.TextValue = "+" + (SharingCount[i] - 1);
+                        InvCount.Color = Cor[i];
+                        InvCount.Draw();
                     }
                 }
             }
         }
 
-        private static void Game_OnTick(EventArgs args)
+        static void Game_OnUpdate(EventArgs args)
         {
-            if (!SharedExpMenu["active"].Cast<CheckBox>().CurrentValue)
-                return;
-                
             int i = -1;
             float expReceived = 0;
 
