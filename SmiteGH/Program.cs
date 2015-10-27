@@ -208,7 +208,7 @@ namespace SmiteGH
                                         else if (Smite.IsReady() && R.IsReady() && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < R.Range
                                         && Vector3.Distance(ObjectManager.Player.ServerPosition, Monster.ServerPosition) < Smite.Range && GetDamages.HasBuffs(Monster, "dianamoonlight"))
                                         {
-                                            SpellDamage = GetDamages.DianaR(Q.Level);
+                                            SpellDamage = GetDamages.DianaR(R.Level);
                                             TotalDamage = SpellDamage + GetSmiteDamage();
                                             if (Monster.Health <= TotalDamage)
                                             {
