@@ -201,7 +201,7 @@ namespace SmiteGH
 
         public static double DianaR(int SpellLevel)
         {
-            return new double[] { 100, 160, 220 }[SpellLevel]
+            return new double[] { 100, 160, 220 }[SpellLevel - 1]
                              + 0.6 * ObjectManager.Player.FlatMagicDamageMod;
         }
     }
