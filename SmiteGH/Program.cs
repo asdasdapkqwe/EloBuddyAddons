@@ -177,7 +177,7 @@ namespace SmiteGH
             if (MobsToSmite["killsmite"].Cast<CheckBox>().CurrentValue)
             {
                 var KillEnemy =
-                    HeroManager.Enemies.FirstOrDefault(hero => hero.IsValidTarget(500f)
+                    EntityManager.Heros.Enemies.FirstOrDefault(hero => hero.IsValidTarget(500f)
                         && SmiteChampDamage() >= hero.Health);
                 if (KillEnemy != null)
                     Player.CastSpell(Smite.Slot, KillEnemy);
