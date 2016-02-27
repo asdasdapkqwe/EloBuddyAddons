@@ -46,11 +46,11 @@ namespace SmiteGH
         {
             Bootstrap.Init(null);
 
-            if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name))
+            if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name.ToLower()))
             {
                 Smite = new Spell.Targeted(SpellSlot.Summoner1, (uint)570f);
             }
-            if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner2).Name))
+            if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner2).Name.ToLower()))
             {
                 Smite = new Spell.Targeted(SpellSlot.Summoner2, (uint)570f);
             }
