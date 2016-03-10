@@ -78,15 +78,27 @@ namespace SmiteGH
             MobsToSmite.AddSeparator();
             MobsToSmite.Add("killsmite", new CheckBox("KS Enemy with Smite"));
             MobsToSmite.AddSeparator();
-            MobsToSmite.Add("SRU_Baron", new CheckBox("Baron Enabled"));
-            MobsToSmite.Add("SRU_Dragon", new CheckBox("Dragon Enabled"));
-            MobsToSmite.Add("SRU_Blue", new CheckBox("Blue Enabled"));
-            MobsToSmite.Add("SRU_Red", new CheckBox("Red Enabled"));
-            MobsToSmite.Add("SRU_Gromp", new CheckBox("Gromp Enabled"));
-            MobsToSmite.Add("SRU_Murkwolf", new CheckBox("Murkwolf Enabled"));
-            MobsToSmite.Add("SRU_Krug", new CheckBox("Krug Enabled"));
-            MobsToSmite.Add("SRU_Razorbeak", new CheckBox("Razorbeak Enabled"));
-            MobsToSmite.Add("Sru_Crab", new CheckBox("Crab Enabled"));
+            
+             if (Game.MapId == GameMapId.TwistedTreeline)
+            {
+                MobsToSmite.Add("TT_Spiderboss", new CheckBox("Vilemaw Enabled"));
+                MobsToSmite.Add("TT_NGolem", new CheckBox("Golem Enabled"));
+                MobsToSmite.Add("TT_NWolf", new CheckBox("Wolf Enabled"));
+                MobsToSmite.Add("TT_NWraith", new CheckBox("Wraith Enabled"));
+            }
+            else
+            {
+                MobsToSmite.Add("SRU_Baron", new CheckBox("Baron Enabled"));
+                MobsToSmite.Add("SRU_RiftHerald", new CheckBox("RiftHerald Enabled"));
+                MobsToSmite.Add("SRU_Dragon", new CheckBox("Dragon Enabled"));
+                MobsToSmite.Add("SRU_Blue", new CheckBox("Blue Enabled"));
+                MobsToSmite.Add("SRU_Red", new CheckBox("Red Enabled"));
+                MobsToSmite.Add("SRU_Gromp", new CheckBox("Gromp Enabled"));
+                MobsToSmite.Add("SRU_Murkwolf", new CheckBox("Murkwolf Enabled"));
+                MobsToSmite.Add("SRU_Krug", new CheckBox("Krug Enabled"));
+                MobsToSmite.Add("SRU_Razorbeak", new CheckBox("Razorbeak Enabled"));
+                MobsToSmite.Add("Sru_Crab", new CheckBox("Crab Enabled"));
+            }
 
             DrawingMenu = SmiteGHMenu.AddSubMenu("Drawing", "drawing");
             DrawingMenu.AddGroupLabel("Drawing Settings");
