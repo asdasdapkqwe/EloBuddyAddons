@@ -839,7 +839,7 @@ namespace SmiteGH
 
         public static Obj_AI_Minion GetNearest(Vector3 pos)
         {
-            var mobs = ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValid && MonstersNames.Any(name => minion.Name.StartsWith(name)) && !MonstersNames.Any(name => minion.Name.Contains("Mini")) && !MonstersNames.Any(name => minion.Name.Contains("Spawn")));
+            var mobs = ObjectManager.Get<Obj_AI_Minion>().Where(minion => minion.IsValid && MonstersNames.Any(name => minion.Name.ToLower().StartsWith(name.ToLower())) && !MonstersNames.Any(name => minion.Name.Contains("Mini")) && !MonstersNames.Any(name => minion.Name.Contains("Spawn")));
             var objAimobs = mobs as Obj_AI_Minion[] ?? mobs.ToArray();
             Obj_AI_Minion NearestMonster = objAimobs.FirstOrDefault();
             double? nearest = null;
