@@ -72,7 +72,7 @@ namespace SummonersTimer
 
             string SpellS = "";
             int SpellCD = 0;
-            if (true)//sender.IsEnemy
+            if (sender.IsEnemy)//sender.IsEnemy
             {
                 switch (args.SData.Name.ToLower())
                 {
