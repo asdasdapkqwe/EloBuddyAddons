@@ -13,15 +13,18 @@ using SharpDX;
 using EloBuddy.SDK.Rendering;
 using System.Diagnostics;
 using Color1 = System.Drawing.Color;
+using System.Threading;
 
 namespace SummonersTimer
 {
-    class Program
+    public class Program
     {
+
         private static TimeSpan ClockNow, DownTime, CDTime;
-        private static Stopwatch sw = new Stopwatch();
-        private static Menu SummonersMenu;
-        private static string Message = "#enemyname used the #spell and will works on #time.";
+        public static List<Messages> MessageList;
+        private static Stopwatch sw;
+        public static Menu SummonersMenu;
+        public static string Message = "#enemyname used the #spell and will works on #time.";
 
         static void Main(string[] args)
         {
@@ -31,6 +34,13 @@ namespace SummonersTimer
         private static void Loading_OnLoadingComplete(EventArgs args)
         {
             Bootstrap.Init(null);
+            sw = new Stopwatch();
+            MessageList = new List<Messages>();
+            MyThreads thrd = new MyThreads();
+            Thread mythread = new Thread(new ThreadStart(thrd.MessageChecker));
+            mythread.IsBackground = true;
+            mythread.Name = "Checker";
+            mythread.Start();
             Obj_AI_Base.OnSpellCast += Obj_AI_Base_OnSpellCast;
             sw.Start();
 
@@ -72,7 +82,7 @@ namespace SummonersTimer
 
             string SpellS = "";
             int SpellCD = 0;
-            if (true)//sender.IsEnemy
+            if (sender.IsEnemy)
             {
                 switch (args.SData.Name.ToLower())
                 {
@@ -137,13 +147,46 @@ namespace SummonersTimer
                             break;
                         }
                 }
+
                 ClockNow = TimeSpan.FromMilliseconds(sw.ElapsedMilliseconds + 3000);
                 CDTime = TimeSpan.FromMilliseconds(SpellCD * 1000);
                 DownTime = TimeSpan.FromMilliseconds(sw.ElapsedMilliseconds + 3000 + SpellCD * 1000);
                 Chat.Print("[SummonersTimer]{0} used {1} in {2:D2}:{3:D2}, down for {4:D2}:{5:D2}, back up at {6:D2}:{7:D2}.", Color1.White, sender.BaseSkinName, SpellS,
                    ClockNow.Minutes, ClockNow.Seconds, CDTime.Minutes, CDTime.Seconds, DownTime.Minutes, DownTime.Seconds);
                 if (SummonersMenu["toAll"].Cast<CheckBox>().CurrentValue)
-                    Chat.Say(Message.Replace("#enemyname", sender.BaseSkinName).Replace("#spell", SpellS).Replace("#time", string.Format("{0:D2}:{1:D2}", DownTime.Minutes,DownTime.Seconds)));
+                {
+                    //Chat.Say(Message.Replace("#enemyname", sender.BaseSkinName).Replace("#spell", SpellS).Replace("#time", string.Format("{0:D2}:{1:D2}", DownTime.Minutes, DownTime.Seconds)));
+                    Messages msg = new Messages();
+                    msg.Name = sender.BaseSkinName;
+                    msg.Spell = SpellS;
+                    msg.Time = string.Format("{0:D2}:{1:D2}", DownTime.Minutes, DownTime.Seconds);
+                    MessageList.Add(msg);
+                }
+            }
+        }
+    }
+    public class MyThreads
+    {
+        public void MessageChecker()
+        {
+            while (true)
+            {
+                if (Program.MessageList.Count > 0)
+                {
+                    Random rnd = new Random();
+                    int delay = rnd.Next(3000, 6000);
+                    string ms;
+                    Messages msg;
+                    msg = Program.MessageList.FirstOrDefault<Messages>();
+                    ms = Program.Message.Replace("#enemyname", msg.Name).Replace("#spell", msg.Spell).Replace("#time", msg.Time);
+                    Program.MessageList.Remove(msg);
+                    Task.Factory.StartNew(() =>
+                    {
+                        Thread.Sleep(delay);
+                        Chat.Say(ms);
+                    });
+                }
+                System.Threading.Thread.Sleep(3000);
             }
         }
     }
