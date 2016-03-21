@@ -53,6 +53,8 @@ namespace JungleTimers
 
         private static void Drawing_OnEndScene(EventArgs args)
         {
+            if (!JungleTimer["active"].Cast<CheckBox>().CurrentValue)
+                return;
 
             foreach (var camp in DeadMobs.Where(x => x.NextRespawnTime - Environment.TickCount > 0))
             {
