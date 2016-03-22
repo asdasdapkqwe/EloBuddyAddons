@@ -169,7 +169,7 @@ namespace SharedExp
                 {
                     if (InvisibleCount[i] > 0)
                     {
-                        Drawing.DrawText(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset, Cor[i], "+" + (SharingCount[i] - 1) + " (" + InvisibleCount[i] + " Inv)");
+                        //Drawing.DrawText(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset, Cor[i], "+" + (SharingCount[i] - 1) + " (" + InvisibleCount[i] + " Inv)");
                         InvCount.Position = new Vector2(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset);
                         InvCount.TextValue = "+" + (SharingCount[i] - 1) + " (" + InvisibleCount[i] + " Inv)";
                         InvCount.Color = Cor[i];
@@ -177,7 +177,7 @@ namespace SharedExp
                     }
                     if (!DrawMenu["onlyShowInv"].Cast<CheckBox>().CurrentValue && InvisibleCount[i] == 0)
                     {
-                        Drawing.DrawText(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset, Cor[i], "+" + (SharingCount[i] - 1));
+                        //Drawing.DrawText(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset, Cor[i], "+" + (SharingCount[i] - 1));
                         InvCount.Position = new Vector2(hero.HPBarPosition.X + textXOffset, hero.HPBarPosition.Y + textYOffset);
                         InvCount.TextValue = "+" + (SharingCount[i] - 1);
                         InvCount.Color = Cor[i];
