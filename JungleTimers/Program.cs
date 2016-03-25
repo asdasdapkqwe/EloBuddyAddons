@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using EloBuddy;
 using EloBuddy.SDK;
-using EloBuddy.SDK.Enumerations;
 using EloBuddy.SDK.Events;
 using EloBuddy.SDK.Menu;
 using EloBuddy.SDK.Menu.Values;
 using SharpDX;
 using EloBuddy.SDK.Rendering;
-using System.Diagnostics;
 using Color1 = System.Drawing.Color;
 
 namespace JungleTimers
@@ -20,6 +16,7 @@ namespace JungleTimers
     {
         public static Menu JungleTimer;
         public static Text txt;
+        public static int Size;
         public static List<Mobs> JungleMobs { get; set; }
         public static IEnumerable<Mobs> DeadMobs
         {
@@ -37,14 +34,17 @@ namespace JungleTimers
         {
             Bootstrap.Init(null);
             Init();
-            txt = new EloBuddy.SDK.Rendering.Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 7, System.Drawing.FontStyle.Bold));
-
+            
             JungleTimer = MainMenu.AddMenu("JungleTimers", "jungletimers");
             JungleTimer.AddGroupLabel("Jungle Timers");
             JungleTimer.AddSeparator();
             JungleTimer.Add("active", new CheckBox("Enabled", true));
             JungleTimer.AddSeparator();
+            JungleTimer.Add("size", new Slider("Text Size", 7, 1, 30));
+            JungleTimer.AddSeparator();
             JungleTimer.AddLabel("Made by GameHackerPM ==> EB.");
+            Size = JungleTimer["size"].Cast<Slider>().CurrentValue;
+            txt = new Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, Size, System.Drawing.FontStyle.Bold));
 
             GameObject.OnCreate += GameObject_OnCreate;
             GameObject.OnDelete += GameObject_OnDelete;
@@ -61,7 +61,7 @@ namespace JungleTimers
                 var timeSpan = TimeSpan.FromMilliseconds(camp.NextRespawnTime - Environment.TickCount);
                 var text = timeSpan.ToString(@"m\:ss");
 
-                txt.Position = new Vector2((int)camp.MinimapPosition.X - 7 / 2, (int)camp.MinimapPosition.Y - 7 / 2);
+                txt.Position = new Vector2((int)camp.MinimapPosition.X - Size / 2, (int)camp.MinimapPosition.Y - Size / 2);
                 txt.Color = Color1.White;
                 txt.TextValue = text;
                 txt.Draw();
