@@ -21,7 +21,7 @@ namespace SummonersTimer
     {
         public static string WorkingPath = System.IO.Path.Combine(EloBuddy.Sandbox.SandboxConfig.DataDirectory, "Addons");
         private static TimeSpan ClockNow, DownTime, CDTime;
-        public static TimeSpan LastAttack;
+        public static DateTime LastAttack;
         public static List<Messages> MessageList;
         public static Stopwatch sw;
         public static Menu SummonersMenu;
@@ -43,6 +43,7 @@ namespace SummonersTimer
             mythread.Name = "Checker";
             mythread.Start();
             sw.Start();
+            LastAttack = DateTime.Now;
 
             if (File.Exists(WorkingPath + "\\MessageST.txt"))
             {
@@ -81,11 +82,11 @@ namespace SummonersTimer
 
         private static void AIHeroClient_OnAttack(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsMinion)
+            if (!sender.IsMe)
                 return;
 
-            LastAttack = TimeSpan.FromMilliseconds(sw.ElapsedMilliseconds);
-        }
+            LastAttack = DateTime.Now;
+            }
 
         private static void Chat_OnInput(ChatInputEventArgs args)
         {
@@ -105,7 +106,7 @@ namespace SummonersTimer
 
             string SpellS = "";
             int SpellCD = 0;
-            if (sender.IsEnemy)
+            if (true)
             {
                 switch (args.SData.Name.ToLower())
                 {
@@ -185,6 +186,8 @@ namespace SummonersTimer
                     msg.Time = string.Format("{0:D2}:{1:D2}", DownTime.Minutes, DownTime.Seconds);
                     MessageList.Add(msg);
                 }
+                Console.WriteLine("Sent : " + SpellS);
+                
             }
         }
         public static bool InTeamFight()
@@ -196,24 +199,70 @@ namespace SummonersTimer
     }
     public class MyThreads
     {
-        private static TimeSpan TimeNow;
+        static string slangName(string champName)
+        {
+            switch (champName)
+            {
+                case "Alistar": return "ali";
+                case "Blitzcrank": return "blitz";
+                case "Caitlyn": return "cait";
+                case "Cassiopeia": return "cass";
+                case "Cho'Gath": return "cho";
+                case "Dr.Mundo": return "mundo";
+                case "Evelynn": return "eve";
+                case "Ezreal": return "ez";
+                case "Fiddlesticks": return "fiddles";
+                case "Gangplank": return "gp";
+                case "Hecarim": return "hec";
+                case "Heimerdinger": return "heimer";
+                case "Jarvan IV": return "j4";
+                case "Katarina": return "kat";
+                case "Kha'Zix": return "khazix";
+                case "Kog'Maw": return "kog";
+                case "LeBlanc": return "lb";
+                case "LeeSin": return "lee";
+                case "Lissandra": return "liss";
+                case "Malphite": return "malph";
+                case "Malzahar": return "malz";
+                case "MasterYi": return "yi";
+                case "MissFortune": return "mf";
+                case "MonkeyKing": return "wk";
+                case "Mordekaiser": return "mord";
+                case "Morgana": return "morg";
+                case "Nautilus": return "naut";
+                case "Nidalee": return "nid";
+                case "Nocturne": return "noct";
+                case "Orianna": return "ori";
+                case "Rek'Sai": return "reksai";
+                case "Sejuani": return "sej";
+                case "TahmKench": return "tahm";
+                case "Tristana": return "trist";
+                case "Tryndamere": return "trynd";
+                case "TwistedFate": return "tf";
+                case "Vel'Koz": return "velkoz";
+                case "Vladimir": return "vlad";
+                case "Volibear": return "voli";
+                case "Warwick": return "ww";
+                case "Xin Zhao": return "xin";
+                default: return champName.ToLower();
+            }
+        }
         public void MessageChecker()
         {
             while (true)
             {
                 if (Program.MessageList.Count > 0 && !Program.InTeamFight())
                 {
-                    TimeNow = TimeSpan.FromMilliseconds(Program.sw.ElapsedMilliseconds);
                     try
                     {
-                        if (Program.LastAttack.Minutes - TimeNow.Minutes >= 5)
+                        if (new DateTime(DateTime.Now.Ticks - Program.LastAttack.Ticks).Second >= 3)
                         {
                             //Random rnd = new Random();
-                            int delay = Program.SummonersMenu["toTime"].Cast<Slider>().CurrentValue;
+                            int delay = Program.SummonersMenu["toWait"].Cast<Slider>().CurrentValue;
                             string ms;
                             Messages msg;
                             msg = Program.MessageList.FirstOrDefault<Messages>();
-                            ms = Program.Message.Replace("#enemyname", msg.Name).Replace("#spell", msg.Spell).Replace("#time", msg.Time);
+                            ms = Program.Message.Replace("#enemyname", slangName(msg.Name)).Replace("#spell", msg.Spell).Replace("#time", msg.Time);
                             Program.MessageList.Remove(msg);
                             Task.Factory.StartNew(() =>
                             {
@@ -222,7 +271,7 @@ namespace SummonersTimer
                             });
                         }
                     }
-                    catch
+                    catch (Exception e)
                     {
                         //Ignored!
                     }
