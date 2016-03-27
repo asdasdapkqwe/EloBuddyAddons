@@ -26,7 +26,7 @@ namespace SmiteGH
 
         public static Spell.Targeted Smite;
         public static Obj_AI_Base Monster;
-        public static Text SmiteStatus = new EloBuddy.SDK.Rendering.Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 9, System.Drawing.FontStyle.Bold));
+        public static Text SmiteStatus; 
         public static string[] SupportedChampions =
         {
             "Nunu" , "Chogath", "Shaco", "Vi", "MasterYi", "Rengar",
@@ -45,7 +45,7 @@ namespace SmiteGH
         private static void Loading_OnLoadingComplete(EventArgs args)
         {
             Bootstrap.Init(null);
-
+            SmiteStatus = new EloBuddy.SDK.Rendering.Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 9, System.Drawing.FontStyle.Bold));
             if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name.ToLower()))
             {
                 Smite = new Spell.Targeted(SpellSlot.Summoner1, (uint)570f);
