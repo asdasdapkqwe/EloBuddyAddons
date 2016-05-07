@@ -26,7 +26,7 @@ namespace SmiteGH
 
         public static Spell.Targeted Smite;
         public static Obj_AI_Base Monster;
-        public static Text SmiteStatus = new EloBuddy.SDK.Rendering.Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 9, System.Drawing.FontStyle.Bold));
+        public static Text SmiteStatus;
         public static string[] SupportedChampions =
         {
             "Nunu" , "Chogath", "Shaco", "Vi", "MasterYi", "Rengar",
@@ -38,7 +38,9 @@ namespace SmiteGH
         {
             "TT_Spiderboss", "TTNGolem", "TTNWolf", "TTNWraith",
             "SRU_Blue", "SRU_Gromp", "SRU_Murkwolf", "SRU_Razorbeak", 
-            "SRU_Red", "SRU_Krug", "SRU_Dragon", "Sru_Crab", "SRU_Baron"
+            "SRU_Red", "SRU_Krug", "Sru_Crab", "SRU_Baron", "SRU_RiftHerald",
+            "SRU_Dragon_Elder", "SRU_Dragon_Air", "SRU_Dragon_Earth",
+            "SRU_Dragon_Fire", "SRU_Dragon_Water"
         };
         public static Menu SmiteGHMenu, MobsToSmite, DrawingMenu;
         private static string[] SmiteNames = new[] { "s5_summonersmiteplayerganker", "itemsmiteaoe", "s5_summonersmitequick", "s5_summonersmiteduel", "summonersmite" };
@@ -46,6 +48,7 @@ namespace SmiteGH
         {
             Bootstrap.Init(null);
 
+            SmiteStatus = new Text("", new System.Drawing.Font(System.Drawing.FontFamily.GenericSansSerif, 9, System.Drawing.FontStyle.Bold));
             if (SmiteNames.Contains(ObjectManager.Player.Spellbook.GetSpell(SpellSlot.Summoner1).Name.ToLower()))
             {
                 Smite = new Spell.Targeted(SpellSlot.Summoner1, (uint)570f);
@@ -90,7 +93,6 @@ namespace SmiteGH
             {
                 MobsToSmite.Add("SRU_Baron", new CheckBox("Baron Enabled"));
                 MobsToSmite.Add("SRU_RiftHerald", new CheckBox("RiftHerald Enabled"));
-                MobsToSmite.Add("SRU_Dragon", new CheckBox("Dragon Enabled"));
                 MobsToSmite.Add("SRU_Blue", new CheckBox("Blue Enabled"));
                 MobsToSmite.Add("SRU_Red", new CheckBox("Red Enabled"));
                 MobsToSmite.Add("SRU_Gromp", new CheckBox("Gromp Enabled"));
@@ -98,6 +100,11 @@ namespace SmiteGH
                 MobsToSmite.Add("SRU_Krug", new CheckBox("Krug Enabled"));
                 MobsToSmite.Add("SRU_Razorbeak", new CheckBox("Razorbeak Enabled"));
                 MobsToSmite.Add("Sru_Crab", new CheckBox("Crab Enabled"));
+                MobsToSmite.Add("SRU_Dragon_Elder", new CheckBox("Dragon Elder Enabled"));
+                MobsToSmite.Add("SRU_Dragon_Air", new CheckBox("Dragon Air Enabled"));
+                MobsToSmite.Add("SRU_Dragon_Earth", new CheckBox("Dragon Earth Enabled"));
+                MobsToSmite.Add("SRU_Dragon_Fire", new CheckBox("Dragon Fire Enabled"));
+                MobsToSmite.Add("SRU_Dragon_Water", new CheckBox("Dragon Water Enabled"));
             }
 
             DrawingMenu = SmiteGHMenu.AddSubMenu("Drawing", "drawing");
