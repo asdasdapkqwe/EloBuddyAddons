@@ -25,7 +25,8 @@ namespace SummonersTimer
         public static List<Messages> MessageList;
         public static Stopwatch sw;
         public static Menu SummonersMenu;
-        public static string Message = "#enemyname used the #spell and will works on #time.";
+        public static string[] Message = new string[] {"#enemyname used the #spell and will works on #time."};
+        public static int LastMessageIndex = 0;
 
         static void Main(string[] args)
         {
@@ -47,12 +48,12 @@ namespace SummonersTimer
 
             if (File.Exists(WorkingPath + "\\MessageST.txt"))
             {
-                StreamReader reader = new StreamReader(WorkingPath + "\\MessageST.txt");
-                Message = reader.ReadLine();
+                Message = File.ReadAllLines(WorkingPath + "\\MessageST.txt");
+                LastMessageIndex = File.ReadAllLines(WorkingPath + "\\MessageST.txt").Count() - 1;
             }
             else
             {
-                File.WriteAllText(WorkingPath + "\\MessageST.txt", Message);
+                File.WriteAllLines(WorkingPath + "\\MessageST.txt", Message);
             }
 
             SummonersMenu = MainMenu.AddMenu("SummonersTimer", "mm");
@@ -63,19 +64,30 @@ namespace SummonersTimer
             SummonersMenu.AddSeparator();
             SummonersMenu.Add("toWait", new Slider("Time after cost spell (Miliseconds)", 4000, 1000, 10000));
             SummonersMenu.AddSeparator();
+            SummonersMenu.Add("showCombo", new ComboBox("Check spells for", 0, new string[]
+            {
+                "Enemy Only",
+                "Enemy and Team",
+                "All includes me"
+            }
+            ));
             SummonersMenu.AddLabel("You can change the message to whatever you want! you can set it by");
-            SummonersMenu.AddLabel("chat message starting with \"..say\" and the message.");
-            SummonersMenu.AddLabel("Example : ..say #enemyname used the #spell and will works on #time.");
+            SummonersMenu.AddLabel("chat message starting with \"..say(numberofmessage)\" and the message.");
+            SummonersMenu.AddLabel("Example : ..say1 #enemyname used the #spell and will works on #time.");
             SummonersMenu.AddSeparator();
             SummonersMenu.AddLabel("#enemyname ==> Enemy Champion name, #spell ==> Summoner Spell,");
             SummonersMenu.AddLabel("#time ==> The time which the spell is ready.");
+            
             SummonersMenu.AddSeparator();
-            SummonersMenu.Add("message", new Label("Message Set to : " + Message));
+            SummonersMenu.AddLabel("Messages Set to : ");
+            for (int i = 0; i < LastMessageIndex; i++)
+                SummonersMenu.Add("message" + i, new Label((i + 1) + ". " + Message[i] + "."));
+
             SummonersMenu.AddSeparator();
             SummonersMenu.AddLabel("Made By GameHackerPM.");
 
             Chat.OnInput += Chat_OnInput;
-            Obj_AI_Base.OnSpellCast += Obj_AI_Base_OnSpellCast;
+            AIHeroClient.OnProcessSpellCast += AIHeroClient_OnProcessSpellCast;
             AIHeroClient.OnSpellCast += AIHeroClient_OnAttack;
             AIHeroClient.OnBasicAttack += AIHeroClient_OnAttack;
         }
@@ -90,23 +102,37 @@ namespace SummonersTimer
 
         private static void Chat_OnInput(ChatInputEventArgs args)
         {
-            if (!args.Input.StartsWith("..say "))
+            if (!args.Input.StartsWith("..say"))
                 return;
 
             args.Process = false;
-            Message = args.Input.Replace("..say ", "");
-            SummonersMenu["message"].DisplayName = "Message Set to : " + Message;
-            File.WriteAllText(WorkingPath + "\\MessageST.txt", Message);
+            int number = 0;
+            try
+            {
+                number = int.Parse(args.Input.Substring("..say".Length, args.Input.LastIndexOf(" ") - "..say".Length));
+            }
+            catch
+            {
+                Chat.Print("[SummonersTimer]You wrote the command in wrong syntax!");
+                return;
+            }
+
+            Message[number - 1] = args.Input.Replace("..say" + number + " ", "");
+            SummonersMenu["message" + (number - 1)].DisplayName = number + ". " + Message[number] + ".";
+            File.WriteAllLines(WorkingPath + "\\MessageST.txt", Message);
+            Chat.Print("[SummonersTimer]Message has been added successfully!");
         }
 
-        private static void Obj_AI_Base_OnSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        private static void AIHeroClient_OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (!args.SData.Name.ToLower().StartsWith("summoner"))
                 return;
 
             string SpellS = "";
             int SpellCD = 0;
-            if (true)
+            if ((SummonersMenu["showCombo"].Cast<ComboBox>().SelectedIndex == 0 && sender.IsEnemy)
+                || (SummonersMenu["showCombo"].Cast<ComboBox>().SelectedIndex == 1 && (sender.IsEnemy || (sender.IsAlly && !sender.IsMe)))
+                || (SummonersMenu["showCombo"].Cast<ComboBox>().SelectedIndex == 2 && !sender.IsMinion && !sender.IsMonster))
             {
                 switch (args.SData.Name.ToLower())
                 {
@@ -175,7 +201,7 @@ namespace SummonersTimer
                 ClockNow = TimeSpan.FromMilliseconds(sw.ElapsedMilliseconds + 3000);
                 CDTime = TimeSpan.FromMilliseconds(SpellCD * 1000);
                 DownTime = TimeSpan.FromMilliseconds(sw.ElapsedMilliseconds + 3000 + SpellCD * 1000);
-                Chat.Print("[SummonersTimer]{0} used {1} in {2:D2}:{3:D2}, down for {4:D2}:{5:D2}, back up at {6:D2}:{7:D2}.", Color1.White, sender.BaseSkinName, SpellS,
+                Chat.Print("[SummonersTimer]{0} used {1} in {2}:{3:D2}, down for {4}:{5:D2}, back up at {6}:{7:D2}.", Color1.White, sender.BaseSkinName, SpellS,
                    ClockNow.Minutes, ClockNow.Seconds, CDTime.Minutes, CDTime.Seconds, DownTime.Minutes, DownTime.Seconds);
                 if (SummonersMenu["toAll"].Cast<CheckBox>().CurrentValue)
                 {
@@ -183,10 +209,9 @@ namespace SummonersTimer
                     Messages msg = new Messages();
                     msg.Name = sender.BaseSkinName;
                     msg.Spell = SpellS;
-                    msg.Time = string.Format("{0:D2}:{1:D2}", DownTime.Minutes, DownTime.Seconds);
+                    msg.Time = string.Format("{0}:{1:D2}", DownTime.Minutes, DownTime.Seconds);
                     MessageList.Add(msg);
                 }
-                Console.WriteLine("Sent : " + SpellS);
                 
             }
         }
@@ -262,7 +287,7 @@ namespace SummonersTimer
                             string ms;
                             Messages msg;
                             msg = Program.MessageList.FirstOrDefault<Messages>();
-                            ms = Program.Message.Replace("#enemyname", slangName(msg.Name)).Replace("#spell", msg.Spell).Replace("#time", msg.Time);
+                            ms = GetRandomMessage().Replace("#enemyname", slangName(msg.Name)).Replace("#spell", msg.Spell).Replace("#time", msg.Time);
                             Program.MessageList.Remove(msg);
                             Task.Factory.StartNew(() =>
                             {
@@ -271,13 +296,19 @@ namespace SummonersTimer
                             });
                         }
                     }
-                    catch (Exception e)
+                    catch 
                     {
                         //Ignored!
                     }
                 }
                 System.Threading.Thread.Sleep(3000);
             }
+        }
+        public static string GetRandomMessage()
+        {
+            Random rnd = new Random();
+            int index = rnd.Next(0, Program.LastMessageIndex);
+            return Program.Message[index];
         }
     }
 }
