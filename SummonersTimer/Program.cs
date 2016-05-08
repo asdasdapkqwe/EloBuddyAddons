@@ -25,8 +25,9 @@ namespace SummonersTimer
         public static List<Messages> MessageList;
         public static Stopwatch sw;
         public static Menu SummonersMenu;
-        public static string[] Message = new string[] {"#enemyname used the #spell and will works on #time."};
-        public static int LastMessageIndex = 0;
+        public static string Message = "#enemyname used the #spell and will works on #time.";
+        //public static string[] Message = new string[] {"#enemyname used the #spell and will works on #time."};
+        //public static int LastMessageIndex = 0;
 
         static void Main(string[] args)
         {
@@ -48,12 +49,15 @@ namespace SummonersTimer
 
             if (File.Exists(WorkingPath + "\\MessageST.txt"))
             {
-                Message = File.ReadAllLines(WorkingPath + "\\MessageST.txt");
-                LastMessageIndex = File.ReadAllLines(WorkingPath + "\\MessageST.txt").Count() - 1;
+                //Message = File.ReadAllLines(WorkingPath + "\\MessageST.txt");
+                //LastMessageIndex = File.ReadAllLines(WorkingPath + "\\MessageST.txt").Count() - 1;
+                StreamReader reader = new StreamReader(WorkingPath + "\\MessageST.txt");
+                Message = reader.ReadLine();
             }
             else
             {
-                File.WriteAllLines(WorkingPath + "\\MessageST.txt", Message);
+                //File.WriteAllLines(WorkingPath + "\\MessageST.txt", Message);
+                File.WriteAllText(WorkingPath + "\\MessageST.txt", Message);
             }
 
             SummonersMenu = MainMenu.AddMenu("SummonersTimer", "mm");
@@ -72,16 +76,19 @@ namespace SummonersTimer
             }
             ));
             SummonersMenu.AddLabel("You can change the message to whatever you want! you can set it by");
-            SummonersMenu.AddLabel("chat message starting with \"..say(numberofmessage)\" and the message.");
-            SummonersMenu.AddLabel("Example : ..say1 #enemyname used the #spell and will works on #time.");
+            //SummonersMenu.AddLabel("chat message starting with \"..say(numberofmessage)\" and the message.");
+            //SummonersMenu.AddLabel("Example : ..say1 #enemyname used the #spell and will works on #time.");
+            SummonersMenu.AddLabel("chat message starting with \"..say\" and the message.");
+            SummonersMenu.AddLabel("Example : ..say #enemyname used the #spell and will works on #time.");
             SummonersMenu.AddSeparator();
             SummonersMenu.AddLabel("#enemyname ==> Enemy Champion name, #spell ==> Summoner Spell,");
             SummonersMenu.AddLabel("#time ==> The time which the spell is ready.");
             
             SummonersMenu.AddSeparator();
-            SummonersMenu.AddLabel("Messages Set to : ");
-            for (int i = 0; i < LastMessageIndex; i++)
-                SummonersMenu.Add("message" + i, new Label((i + 1) + ". " + Message[i] + "."));
+            SummonersMenu.Add("message", new Label("Message Set to : " + Message));
+            //SummonersMenu.AddLabel("Messages Set to : ");
+            //for (int i = 0; i < LastMessageIndex; i++)
+            //    SummonersMenu.Add("message" + i, new Label((i + 1) + ". " + Message[i] + "."));
 
             SummonersMenu.AddSeparator();
             SummonersMenu.AddLabel("Made By GameHackerPM.");
@@ -102,24 +109,27 @@ namespace SummonersTimer
 
         private static void Chat_OnInput(ChatInputEventArgs args)
         {
-            if (!args.Input.StartsWith("..say"))
+            if (!args.Input.StartsWith("..say "))
                 return;
 
             args.Process = false;
-            int number = 0;
-            try
-            {
-                number = int.Parse(args.Input.Substring("..say".Length, args.Input.LastIndexOf(" ") - "..say".Length));
-            }
-            catch
-            {
-                Chat.Print("[SummonersTimer]You wrote the command in wrong syntax!");
-                return;
-            }
+            Message = args.Input.Replace("..say ", "");
+            SummonersMenu["message"].DisplayName = "Message Set to : " + Message;
+            File.WriteAllText(WorkingPath + "\\MessageST.txt", Message);
+            //int number = 0;
+            //try
+            //{
+            //    number = int.Parse(args.Input.Substring("..say".Length, args.Input.LastIndexOf(" ") - "..say".Length));
+            //}
+            //catch
+            //{
+            //    Chat.Print("[SummonersTimer]You wrote the command in wrong syntax!");
+            //    return;
+            //}
 
-            Message[number - 1] = args.Input.Replace("..say" + number + " ", "");
-            SummonersMenu["message" + (number - 1)].DisplayName = number + ". " + Message[number] + ".";
-            File.WriteAllLines(WorkingPath + "\\MessageST.txt", Message);
+            //Message[number - 1] = args.Input.Replace("..say" + number + " ", "");
+            //SummonersMenu["message" + (number - 1)].DisplayName = number + ". " + Message[number] + ".";
+            //File.WriteAllLines(WorkingPath + "\\MessageST.txt", Message);
             Chat.Print("[SummonersTimer]Message has been added successfully!");
         }
 
@@ -287,7 +297,7 @@ namespace SummonersTimer
                             string ms;
                             Messages msg;
                             msg = Program.MessageList.FirstOrDefault<Messages>();
-                            ms = GetRandomMessage().Replace("#enemyname", slangName(msg.Name)).Replace("#spell", msg.Spell).Replace("#time", msg.Time);
+                            ms = Program.Message.Replace("#enemyname", slangName(msg.Name)).Replace("#spell", msg.Spell).Replace("#time", msg.Time);
                             Program.MessageList.Remove(msg);
                             Task.Factory.StartNew(() =>
                             {
@@ -304,11 +314,11 @@ namespace SummonersTimer
                 System.Threading.Thread.Sleep(3000);
             }
         }
-        public static string GetRandomMessage()
-        {
-            Random rnd = new Random();
-            int index = rnd.Next(0, Program.LastMessageIndex);
-            return Program.Message[index];
-        }
+        //public static string GetRandomMessage()
+        //{
+        //    Random rnd = new Random();
+        //    int index = rnd.Next(0, Program.LastMessageIndex);
+        //    return Program.Message[index];
+        //}
     }
 }
