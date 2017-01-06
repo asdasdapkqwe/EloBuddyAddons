@@ -146,31 +146,31 @@ namespace SummonersTimer
             {
                 switch (args.SData.Name.ToLower())
                 {
-                    case "summonerheal":
+                    case "sifa":
                         {
                             SpellCD = 240;
                             SpellS = "Heal";
                             break;
                         }
-                    case "summonerdot"://ignite
+                    case "tutustur"://ignite
                         {
                             SpellCD = 180;
                             SpellS = "Ignite";
                             break;
                         }
-                    case "summonerexhaust":
+                    case "bitkinlik":
                         {
                             SpellCD = 210;
                             SpellS = "Exhaust";
                             break;
                         }
-                    case "summonerflash":
+                    case "flash":
                         {
                             SpellCD = 300;
                             SpellS = "Flash";
                             break;
                         }
-                    case "summonerhaste"://Ghost
+                    case "hayalet"://Ghost
                         {
                             SpellCD = 210;
                             SpellS = "Ghost";
@@ -182,13 +182,13 @@ namespace SummonersTimer
                             SpellS = "Clarity";
                             break;
                         }
-                    case "summonerbarrier":
+                    case "bariyer":
                         {
                             SpellCD = 210;
                             SpellS = "Barrier";
                             break;
                         }
-                    case "summonerteleport":
+                    case "tp":
                         {
                             SpellCD = 300;
                             SpellS = "Teleport";
